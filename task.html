@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Custom Route Planner</title>
+  <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places"></script>
+  <style>
+    #map { height: 400px; width: 100%; }
+    #controls { margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+  <div id="controls">
+    <input id="origin" type="text" placeholder="Enter origin">
+    <input id="destination" type="text" placeholder="Enter destination">
+    <label><input type="checkbox" id="avoidTolls"> Avoid Tolls</label>
+    <label><input type="checkbox" id="avoidHighways"> Avoid Highways</label>
+    <button onclick="calculateRoute()">Get Route</button>
+  </div>
+  <div id="map"></div>
+  <div id="output"></div>
+
+  <script>
+    let map, directionsService, directionsRenderer;
+
+    function initMap() {
+      map = new google.maps.Map(document.getElementById("map"), {
+        center: { lat: 19.0728, lng: 72.8826 }, // Mumbai
+        zoom: 7,
+      });
+      directionsService = new google.maps.DirectionsService();
+      directionsRenderer = new google.maps.DirectionsRenderer();
+      directionsRenderer.setMap(map);
+    }
+
+    function calculateRoute() {
+      const origin = document.getElementById("origin").value;
+      const destination = document.getElementById("destination").value;
+      const avoidTolls = document.getElementById("avoidTolls").checked;
+      const avoidHighways = document.getElementById("avoidHighways").checked;
+
+      const request = {
+        origin: origin,
+        destination: destination,
+        travelMode: google.maps.TravelMode.DRIVING,
+        avoidTolls: avoidTolls,
+        avoidHighways: avoidHighways,
+      };
+
+      directionsService.route(request, (result, status) => {
+        if (status === "OK") {
+          directionsRenderer.setDirections(result);
+          const route = result.routes[0].legs[0];
+          document.getElementById("output").innerHTML = `
+            <p><strong>Distance:</strong> ${route.distance.text}</p>
+            <p><strong>Duration:</strong> ${route.duration.text}</p>
+          `;
+        } else {
+          document.getElementById("output").innerHTML = `<p>Route not found: ${status}</p>`;
+        }
+      });
+    }
+
+    window.onload = initMap;
+  </script>
+</body>
+</html>
